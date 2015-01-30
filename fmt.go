@@ -2,9 +2,17 @@ package main
 
 import (
 	"fmt"
+	"syscall"
 
+	"github.com/kless/term"
 	"github.com/mgutz/ansi"
 )
+
+func init() {
+	if !term.IsTerminal(syscall.Stdout) {
+		ansi.DisableColors(true)
+	}
+}
 
 type colorPrinter struct {
 	fn func(string) string
