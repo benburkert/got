@@ -6,6 +6,12 @@ import (
 	"github.com/benburkert/go-libgit2"
 )
 
+var (
+	colorDiffCommit = "yellow" // git config color.diff.commit
+
+	fmtDiffCommit = colorFmt(colorDiffCommit)
+)
+
 func main() {
 	if len(os.Args) < 2 {
 		help()

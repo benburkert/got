@@ -48,7 +48,7 @@ func display(commit *libgit2.Commit) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("commit %s\n", commit.ID())
+	fmtDiffCommit.Printf("commit %s\n", commit.ID())
 	if len(parents) > 1 {
 		fmt.Print("Merge:")
 		for _, cmt := range parents {
