@@ -1,0 +1,3 @@
+[submodule "testdata/go"]
+	path = testdata/go
+	url = https://github.com/golang/go
