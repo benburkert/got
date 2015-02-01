@@ -19,16 +19,6 @@ func Log() {
 	fs.BoolVar(&logOpts.abbrevCommit, "abbrev-commit", false, "")
 	fs.Parse(os.Args[2:])
 
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	repo, err := libgit2.OpenRepository(wd)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	walker, err := repo.Walk(libgit2.Sorting(libgit2.SortTime))
 	if err != nil {
 		log.Fatal(err)
@@ -60,7 +50,7 @@ func display(commit *libgit2.Commit) {
 	var cid string
 	if logOpts.abbrevCommit {
 		if cid, err = commit.ShortID(); err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	} else {
 		cid = commit.String()
