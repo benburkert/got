@@ -47,5 +47,5 @@ func ShortLog() {
 
 // git-shortlog subs 's/\\n/\s{5}/g' on multi-line subjects
 func shortlogSubject(s string) string {
-	return strings.Replace(s, "\n", "     ", -1)
+	return strings.TrimSpace(strings.Replace(s, "\n", "     ", -1))
 }

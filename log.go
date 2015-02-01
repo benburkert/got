@@ -6,17 +6,21 @@ import (
 	"log"
 	"os"
 	"strings"
+	"unicode"
 
 	"github.com/benburkert/go-libgit2"
 )
 
 var logOpts = struct {
 	abbrevCommit bool
+	format       string
 }{}
 
 func Log() {
 	fs := flag.NewFlagSet("git-log", flag.ExitOnError)
 	fs.BoolVar(&logOpts.abbrevCommit, "abbrev-commit", false, "")
+	fs.StringVar(&logOpts.format, "pretty", "", "")
+	fs.StringVar(&logOpts.format, "format", "", "")
 	fs.Parse(os.Args[2:])
 
 	walker, err := repo.Walk(libgit2.Sorting(libgit2.SortTime))
@@ -24,25 +28,53 @@ func Log() {
 		log.Fatal(err)
 	}
 
-	display(<-walker.C)
+	display(<-walker.C, true)
 	for commit := range walker.C {
-		fmt.Println()
-		display(commit)
+		display(commit, false)
 	}
 }
 
-func display(commit *libgit2.Commit) {
+func display(commit *libgit2.Commit, firstLine bool) {
+	switch logOpts.format {
+	case "oneline":
+		displayOneLine(commit)
+	case "short":
+	case "medium", "":
+		displayMedium(commit, firstLine)
+	case "full":
+	case "fuller":
+	case "email":
+	case "raw":
+	}
+}
+
+func displayOneLine(commit *libgit2.Commit) {
+	var (
+		cid string
+		err error
+	)
+
+	if logOpts.abbrevCommit {
+		if cid, err = commit.ShortID(); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		cid = commit.String()
+	}
+
+	fmtDiffCommit.Printf(cid)
+	message := strings.Replace(commit.Subject(), "\n", " ", -1)
+	message = strings.TrimRightFunc(message, unicode.IsSpace)
+	fmt.Printf(" %s\n", message)
+}
+
+func displayMedium(commit *libgit2.Commit, firstLine bool) {
 	sig, err := commit.Author()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	parents, err := commit.Parents()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = commit.ShortID()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,6 +86,10 @@ func display(commit *libgit2.Commit) {
 		}
 	} else {
 		cid = commit.String()
+	}
+
+	if !firstLine {
+		fmt.Println()
 	}
 
 	fmtDiffCommit.Printf("commit %s\n", cid)
