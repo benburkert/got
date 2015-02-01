@@ -8,7 +8,7 @@ function assert() {
   run diff -u <(got $@) <(git $@)
 
   if [ -n "$output" ]; then
-    echo "$output" | cdiff -q 2>/dev/null
+    echo "$output" | head -n 30 | cdiff -q 2>/dev/null
     return 1
   fi
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -9,7 +10,15 @@ import (
 	"github.com/benburkert/go-libgit2"
 )
 
+var logOpts = struct {
+	abbrevCommit bool
+}{}
+
 func Log() {
+	fs := flag.NewFlagSet("git-log", flag.ExitOnError)
+	fs.BoolVar(&logOpts.abbrevCommit, "abbrev-commit", false, "")
+	fs.Parse(os.Args[2:])
+
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +57,16 @@ func display(commit *libgit2.Commit) {
 		log.Fatal(err)
 	}
 
-	fmtDiffCommit.Printf("commit %s\n", commit.ID())
+	var cid string
+	if logOpts.abbrevCommit {
+		if cid, err = commit.ShortID(); err != nil {
+			panic(err)
+		}
+	} else {
+		cid = commit.String()
+	}
+
+	fmtDiffCommit.Printf("commit %s\n", cid)
 	if len(parents) > 1 {
 		fmt.Print("Merge:")
 		for _, cmt := range parents {
